@@ -121,23 +121,39 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $iam;
 
     /**
-     * @param Iam $iam [optional] An IAM instance.
+     * @var string
      */
-    public function __construct(Iam $iam = null)
+    private $scopes;
+
+    /**
+     * @param Iam $iam [optional] An IAM instance.
+     * @param string|array scope the scope of the access request, expressed
+     *   either as an Array or as a space-delimited String.
+     */
+    public function __construct(Iam $iam = null, $scope = null)
     {
         $this->iam = $iam;
+        $this->scopes = is_array($scope) ? implode(',', $scope) : str_replace(' ', ',', $scope);
     }
 
     /**
      * The full uri for accessing the default token.
      *
+     * @param string|null $scopes comma separated list of scopes to request
+     *
      * @return string
      */
-    public static function getTokenUri()
+    public static function getTokenUri(string $scopes = null)
     {
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
-        return $base . self::TOKEN_URI_PATH;
+        $uri = $base . self::TOKEN_URI_PATH;
+
+        if ($scopes) {
+            $uri .= '?scopes=' . urlencode($scopes);
+        }
+
+        return $uri;
     }
 
     /**
@@ -235,7 +251,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             return array();  // return an empty array with no access token
         }
 
-        $json = $this->getFromMetadata($httpHandler, self::getTokenUri());
+        $json = $this->getFromMetadata($httpHandler, self::getTokenUri($this->scope));
         if (null === $json = json_decode($json, true)) {
             throw new \Exception('Invalid JSON response');
         }
