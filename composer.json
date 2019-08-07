@@ -1,5 +1,5 @@
 {
-  "name": "google/auth",
+  "name": "everphone-gmbh/google-auth-library-php",
   "type": "library",
   "description": "Google Auth Library for PHP",
   "keywords": ["google", "oauth2", "authentication"],
@@ -22,6 +22,9 @@
   },
   "suggest": {
     "phpseclib/phpseclib": "May be used in place of OpenSSL for signing strings. Please require version ^2."
+  },
+  "replace": {
+    "google/auth": "*"
   },
   "autoload": {
     "psr-4": {
